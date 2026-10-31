@@ -12,8 +12,8 @@ Add to your  plugins:
 ["plugin.singular"] = {
     publisherId = "com.cubeage",
     supportedPlatforms = {
-        android = { url = "https://github.com/Cubeage/solar2d-singular/releases/download/v1.0.0/android.tgz" },
-        iphone  = { url = "https://github.com/Cubeage/solar2d-singular/releases/download/v1.0.0/iphone.tgz" },
+        android = { url = "https://github.com/Cubeage/solar2d-singular-sdk/releases/download/v1.0.0/android.tgz" },
+        iphone  = { url = "https://github.com/Cubeage/solar2d-singular-sdk/releases/download/v1.0.0/iphone.tgz" },
         ["mac-sim"]  = false,
         ["win32-sim"] = false,
     },
