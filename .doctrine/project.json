@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "project": {
-    "repo": "Cubeage/solar2d-singular",
+    "repo": "Cubeage/solar2d-singular-sdk",
     "name": "Cubeage Solar2D Singular Plugin",
     "lifecycle": "production",
     "layer": "foundation",
@@ -123,13 +123,13 @@
       {
         "id": "no-required-pr-contexts",
         "description": "Branch protection has no required PR status contexts for plugin or package changes.",
-        "owner": "Cubeage/solar2d-singular",
+        "owner": "Cubeage/solar2d-singular-sdk",
         "target": "Future CI adoption issue"
       },
       {
         "id": "release-bot-not-adopted",
         "description": "Package release is tag-triggered and currently lacks a dedicated release GitHub App or bot-owned version PR.",
-        "owner": "Cubeage/solar2d-singular",
+        "owner": "Cubeage/solar2d-singular-sdk",
         "target": "ADR-59 release control-plane adoption"
       },
       {
