@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: sylphx-linux-standard
+    runs-on: sylphx-linux-standard-merge
     timeout-minutes: 20
 
     steps:
@@ -74,7 +74,7 @@ jobs:
   ci-ok:
     if: ${{ always() }}
     needs: [build]
-    runs-on: sylphx-linux-standard
+    runs-on: ${{ github.event_name == 'merge_group' && 'sylphx-linux-standard-merge' || 'sylphx-linux-standard' }}
     timeout-minutes: 2
     steps:
       - name: Require successful Android compilation and package checks
