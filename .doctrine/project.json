@@ -98,7 +98,7 @@
   "delivery": {
     "ciModel": "legacy-ci",
     "requiredContexts": [],
-    "deployPath": "Release artifacts are built by .github/workflows/build-android.yml and published by .github/workflows/release.yml on v* tag pushes. No required PR status context is currently configured in branch protection.",
+    "deployPath": "Build Android compiles and validates the Android package on pull_request, merge_group and main pushes, with a fail-closed ci-ok fan-in. The unchanged .github/workflows/release.yml definition uses the same reusable build on v* tag pushes, but Release remains administratively disabled as observed on 2026-11-02; only Build Android is enabled. No required PR status context is currently configured in branch protection.",
     "productionProof": "Release changes require Android build artifacts, package smoke evidence, GitHub Release asset readback, and consumer compatibility notes for affected apps. Manifest-only changes are proven by the doctrine project-control audit.",
     "recoveryClass": "forward-fix-only",
     "packageRelease": {

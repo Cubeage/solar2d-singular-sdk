@@ -1,18 +1,28 @@
 name: Build Android
 
 on:
+  pull_request:
+  merge_group:
+    types: [checks_requested]
   push:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
   workflow_call:
+
+permissions:
+  contents: read
 
 jobs:
   build:
     runs-on: sylphx-linux-standard
+    timeout-minutes: 20
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Test package validation
+        run: python3 -m unittest discover -s tests -v
 
       - name: Set up Java 17
         uses: actions/setup-java@v4
@@ -20,57 +30,54 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Fetch Solar2D Corona classes (from CoronaCards AAR)
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools platforms;android-34 build-tools;34.0.0'
+
+      # Official Solar2D 3736 asset, read and checksum-verified on 2026-11-02.
+      # Compile-only: the consumer still provides the Solar2D runtime.
+      - name: Fetch Solar2D Corona classes
         run: |
-          ASSET_URL=$(gh api repos/coronalabs/corona/releases/latest \
-            --jq '.assets[] | select(.name | startswith("CoronaCards-Android")) | .browser_download_url')
-          echo "Downloading: $ASSET_URL"
-          curl -L "$ASSET_URL" -o CoronaCards-Android.zip
-          unzip -o CoronaCards-Android.zip -d coronacards_android
-          AAR=$(find coronacards_android -name "*.aar" | head -1)
-          echo "Found AAR: $AAR"
-          mkdir -p aar_contents
-          unzip -o "$AAR" -d aar_contents
+          curl --fail --location --silent --show-error \
+            https://github.com/coronalabs/corona/releases/download/3736/CoronaCards-Android-2026.3736.zip \
+            --output CoronaCards-Android.zip
+          sha256sum --check <<'CHECKSUM'
+          41541c7ff94570079b9013615a066bcc3365a32ace7f95f43a693c3cdaed630c  CoronaCards-Android.zip
+          CHECKSUM
+          unzip -p CoronaCards-Android.zip CoronaCards.aar > coronacards-compile.aar
           mkdir -p android/libs
-          if [ -f aar_contents/classes.jar ]; then
-            cp aar_contents/classes.jar android/libs/Corona.jar
-            echo "Copied classes.jar -> android/libs/Corona.jar"
-          else
-            echo "ERROR: classes.jar not found in AAR"
-            exit 1
-          fi
-          ls -la android/libs/
+          unzip -p coronacards-compile.aar classes.jar > android/libs/Corona.jar
+          jar tf android/libs/Corona.jar | grep -Fx 'com/ansca/corona/CoronaRuntime.class'
+          jar tf android/libs/Corona.jar | grep -Fx 'com/naef/jnlua/LuaState.class'
 
-      - name: Make gradlew executable
-        run: chmod +x android/gradlew
-
-      - name: Build AAR
-        run: |
-          cd android
-          ./gradlew assembleRelease --stacktrace
-
-      - name: Locate AAR
-        id: aar
-        run: |
-          AAR=$(find android/build -name "*-release.aar" | head -1)
-          echo "aar_path=$AAR" >> $GITHUB_OUTPUT
-          echo "Found AAR: $AAR"
+      - name: Compile and assemble Android release
+        working-directory: android
+        run: sh ./gradlew --no-daemon --max-workers=2 assembleRelease --stacktrace
 
       - name: Package android.tgz
         run: |
           mkdir -p package_android
-          cp "${{ steps.aar.outputs.aar_path }}" package_android/plugin-release.aar
+          cp android/build/outputs/aar/plugin-singular-release.aar package_android/plugin-release.aar
           cp android/corona.gradle package_android/corona.gradle
           cp metadata.lua package_android/metadata.lua
-          cd package_android
-          tar czf ../android.tgz .
-          echo "android.tgz contents:"
-          tar tzf ../android.tgz
+          tar czf android.tgz -C package_android .
+          python3 scripts/check_android_package.py android.tgz
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: android-plugin
           path: android.tgz
+          if-no-files-found: error
+
+  ci-ok:
+    if: ${{ always() }}
+    needs: [build]
+    runs-on: sylphx-linux-standard
+    timeout-minutes: 2
+    steps:
+      - name: Require successful Android compilation and package checks
+        env:
+          BUILD_RESULT: ${{ needs.build.result }}
+        run: test "$BUILD_RESULT" = success
