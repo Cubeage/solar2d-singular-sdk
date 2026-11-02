@@ -97,8 +97,10 @@
   },
   "delivery": {
     "ciModel": "legacy-ci",
-    "requiredContexts": [],
-    "deployPath": "Build Android compiles and validates the Android package on pull_request, merge_group and main pushes, with a fail-closed ci-ok fan-in. The unchanged .github/workflows/release.yml definition uses the same reusable build on v* tag pushes, but Release remains administratively disabled as observed on 2026-11-02; only Build Android is enabled. No required PR status context is currently configured in branch protection.",
+    "requiredContexts": [
+      "ci-ok"
+    ],
+    "deployPath": "Build Android compiles and validates the Android package on pull_request, merge_group and main pushes, with a fail-closed ci-ok fan-in. The active sylphx-merge-queue ruleset requires ci-ok from GitHub Actions (App 15368), as read on 2026-11-02; its canonical policy is SylphxAI/.github policy/merge-queue.json. The unchanged .github/workflows/release.yml definition uses the same reusable build on v* tag pushes, but Release remains administratively disabled; only Build Android is enabled.",
     "productionProof": "Release changes require Android build artifacts, package smoke evidence, GitHub Release asset readback, and consumer compatibility notes for affected apps. Manifest-only changes are proven by the doctrine project-control audit.",
     "recoveryClass": "forward-fix-only",
     "packageRelease": {
@@ -121,12 +123,6 @@
     "status": "baseline",
     "gaps": [
       {
-        "id": "no-required-pr-contexts",
-        "description": "Branch protection has no required PR status contexts for plugin or package changes.",
-        "owner": "Cubeage/solar2d-singular-sdk",
-        "target": "Future CI adoption issue"
-      },
-      {
         "id": "release-bot-not-adopted",
         "description": "Package release is tag-triggered and currently lacks a dedicated release GitHub App or bot-owned version PR.",
         "owner": "Cubeage/solar2d-singular-sdk",
@@ -134,7 +130,7 @@
       },
       {
         "id": "central-admission-not-adopted",
-        "description": "Repository has not adopted central ADR-29 stable admission fan-in contexts.",
+        "description": "Repository uses its local Android ci-ok producer rather than the central ADR-29 admission workflow.",
         "owner": "SylphxAI/doctrine#61",
         "target": "Central CI runner and admission control plane"
       }
