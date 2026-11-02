@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: sylphx-linux-standard-merge
+    runs-on: ${{ (github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'workflow_dispatch') && 'sylphx-linux-standard-merge' || 'sylphx-linux-standard' }}
     timeout-minutes: 20
 
     steps:
