@@ -47,9 +47,10 @@ merge group and push to `main`, without path filters. It also checks that
 `android.tgz` contains the compiled `plugin.singular.LuaLoader` entry point,
 Android manifest, and unchanged source copies of `metadata.lua` and
 `corona.gradle`. The `ci-ok` job succeeds only when the build and package checks
-succeed; a failed, cancelled or skipped build cannot pass it. Repository rules
-must require this context to enforce it; defining a workflow alone does not
-install branch protection.
+succeed; a failed, cancelled or skipped build cannot pass it. The active
+repository rules require `ci-ok` from GitHub Actions before a queued change can
+merge. That requirement is managed in the [shared merge-queue policy](https://github.com/SylphxAI/.github/blob/main/policy/merge-queue.json),
+not installed by the workflow itself.
 
 The workflow pins and verifies its compile-only Solar2D SDK download. It does
 not bundle the Solar2D runtime or change the plugin's Lua API or Singular SDK
