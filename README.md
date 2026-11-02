@@ -60,8 +60,10 @@ With Java 17, Android SDK platform 34/build tools 34.0.0 and the compile-only
 Corona classes available, build with `cd android && sh ./gradlew assembleRelease`.
 Check the resulting package with `python3 scripts/check_android_package.py android.tgz`.
 
-Tag pushes matching `v*` still call the same Android build and publish
-`android.tgz` through `Release`. The workflow artifact remains `android-plugin`;
+The `Release` workflow definition still calls the same Android build and
+publishes `android.tgz` for tag pushes matching `v*`. It was administratively
+disabled when checked on 2026-11-02 and remains disabled; this change enables
+only `Build Android`, not release publication. The workflow artifact remains `android-plugin`;
 inside the package the consumer filenames remain `plugin-release.aar`,
 `corona.gradle` and `metadata.lua`. CI changes alone do not publish a release
 or change the existing installation URLs.
