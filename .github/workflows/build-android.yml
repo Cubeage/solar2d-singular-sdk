@@ -70,6 +70,7 @@ jobs:
           name: android-plugin
           path: android.tgz
           if-no-files-found: error
+          retention-days: 1
 
   ci-ok:
     if: ${{ always() }}
